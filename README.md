@@ -1,91 +1,100 @@
-# Atelier Sécurité des Endpoints et Supervision SIEM
+# Endpoint Security and SIEM Monitoring Workshop
 
-> **Étude de Cas Multi-OS (Linux & Windows) avec Wazuh**
+> **Multi-OS Case Study (Linux & Windows) with Wazuh**
 
 [![AWS](https://img.shields.io/badge/AWS-Cloud-orange)](https://aws.amazon.com/)
 [![Wazuh](https://img.shields.io/badge/Wazuh-4.7-blue)](https://wazuh.com/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04-E95420)](https://ubuntu.com/)
 [![Windows Server](https://img.shields.io/badge/Windows-Server-0078D6)](https://www.microsoft.com/)
 
+---
+
 ## 📋 Description
 
-Ce projet démontre le déploiement et la configuration d'une plateforme complète de supervision de sécurité utilisant **Wazuh** (SIEM + EDR) dans un environnement cloud AWS. L'infrastructure surveille des endpoints Linux et Windows pour détecter et analyser diverses menaces en temps réel.
+This project demonstrates the deployment and configuration of a complete security monitoring platform using **Wazuh** (SIEM + EDR) in an AWS cloud environment.
 
-## 🎯 Objectifs
+The infrastructure monitors both Linux and Windows endpoints to detect and analyze various threats in real time.
 
-- Déployer une architecture de sécurité complète sur AWS
-- Implémenter la détection d'intrusions multi-OS
-- Démontrer les capacités SIEM et EDR de Wazuh
-- Simuler et détecter différents scénarios d'attaque
+---
+
+## 🎯 Objectives
+
+* Deploy a complete security architecture on AWS
+* Implement multi-OS intrusion detection
+* Demonstrate Wazuh’s SIEM and EDR capabilities
+* Simulate and detect different attack scenarios
+
+---
 
 ## 🏗️ Architecture
 
 ![Architecture](./assets/1.png)
 
-L'infrastructure comprend :
-- **Serveur Wazuh** (Ubuntu 22.04) : Manager + Indexer + Dashboard
-- **Client Linux** (Ubuntu 22.04) : Agent Wazuh
-- **Client Windows** (Windows Server) : Agent Wazuh
-- **AWS VPC** avec Security Groups configurés
+The infrastructure includes:
+
+* **Wazuh Server** (Ubuntu 22.04): Manager + Indexer + Dashboard
+* **Linux Client** (Ubuntu 22.04): Wazuh Agent
+* **Windows Client** (Windows Server): Wazuh Agent
+* **AWS VPC** with configured Security Groups
+
+---
 
 ## 🚀 Installation
 
-### 1. Provisionnement des Instances EC2
+### 1. EC2 Instance Provisioning
 
-#### Configuration du Serveur Wazuh
+#### Wazuh Server Configuration
 
-**Sélection de l'AMI Ubuntu 22.04 LTS :**
-
+**Ubuntu 22.04 LTS AMI selection:**
 ![AMI Selection](./assets/2.png)
 
-**Configuration du stockage (30 GB) :**
-
+**Storage configuration (30 GB):**
 ![Storage Config](./assets/3.png)
 
-**Association au VPC :**
-
+**VPC association:**
 ![VPC Config](./assets/4.png)
 
-#### Installation de Wazuh
+---
+
+#### Wazuh Installation
 
 ```bash
-# Mise à jour du système
+# System update
 sudo apt update && sudo apt upgrade -y
 ```
 
 ![System Update](./assets/6.png)
 
 ```bash
-# Téléchargement du script d'installation
+# Download installation script
 curl -sO https://packages.wazuh.com/4.7/wazuh-install.sh
 ```
 
 ![Download Script](./assets/7.png)
 
 ```bash
-# Installation complète (Manager + Indexer + Dashboard)
+# Full installation (Manager + Indexer + Dashboard)
 sudo bash wazuh-install.sh -a
 ```
 
 ![Installation Progress](./assets/8.png)
 ![Installation Complete](./assets/10.png)
 
-**Accès au Dashboard :**
-
+**Dashboard access:**
 ![Dashboard Login](./assets/11.png)
 
-**Vérification des services :**
-
+**Service status verification:**
 ![Service Status](./assets/12.png)
 
-### 2. Déploiement Agent Linux
+---
 
-**Interface de déploiement :**
+### 2. Linux Agent Deployment
 
+**Deployment interface:**
 ![Deploy Linux Agent](./assets/14.png)
 
 ```bash
-# Télécharger et installer l'agent
+# Download and install the agent
 wget https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.7.0-1_amd64.deb
 sudo dpkg -i wazuh-agent_4.7.0-1_amd64.deb
 ```
@@ -93,7 +102,7 @@ sudo dpkg -i wazuh-agent_4.7.0-1_amd64.deb
 ![Linux Agent Install](./assets/15.png)
 
 ```bash
-# Configurer et démarrer
+# Configure and start
 sudo systemctl daemon-reload
 sudo systemctl enable wazuh-agent
 sudo systemctl start wazuh-agent
@@ -101,166 +110,184 @@ sudo systemctl start wazuh-agent
 
 ![Linux Agent Start](./assets/16.png)
 
-**Agent actif dans le dashboard :**
-
+**Active agent in the dashboard:**
 ![Linux Agent Active](./assets/17.png)
 
-### 3. Déploiement Agent Windows
+---
 
-**Interface de déploiement :**
+### 3. Windows Agent Deployment
 
+**Deployment interface:**
 ![Deploy Windows Agent](./assets/18.png)
 
 ```powershell
-# PowerShell en mode Administrateur
+# Run PowerShell as Administrator
 Invoke-WebRequest -Uri https://packages.wazuh.com/4.x/windows/wazuh-agent-4.7.0-1.msi -OutFile wazuh-agent.msi
 
-# Installation silencieuse
-msiexec.exe /i wazuh-agent.msi /q WAZUH_MANAGER='[IP_SERVEUR]' WAZUH_AGENT_NAME='Windows-Client'
+# Silent installation
+msiexec.exe /i wazuh-agent.msi /q WAZUH_MANAGER='[SERVER_IP]' WAZUH_AGENT_NAME='Windows-Client'
 ```
 
 ![Windows Agent Install](./assets/19.png)
 
 ```powershell
-# Démarrer le service
+# Start the service
 NET START WazuhSvc
 ```
 
 ![Windows Agent Start](./assets/20.png)
 
-**Agent actif dans le dashboard :**
-
+**Active agent in the dashboard:**
 ![Windows Agent Active](./assets/21.png)
 
-## 🔒 Configuration Réseau
+---
+
+## 🔒 Network Configuration
 
 ### Security Groups
 
-**Serveur Wazuh :**
-- Port 22 (SSH) : Administration
-- Port 443 (HTTPS) : Dashboard Web
-- Ports 1514-1515 (TCP) : Communication agents
+**Wazuh Server:**
 
-**Clients :**
-- Port 22 (Linux) / 3389 (Windows) : Administration
-- Sortant vers ports Wazuh du serveur
+* Port 22 (SSH): Administration
+* Port 443 (HTTPS): Web Dashboard
+* Ports 1514–1515 (TCP): Agent communication
+
+**Clients:**
+
+* Port 22 (Linux) / 3389 (Windows): Administration
+* Outbound access to Wazuh server ports
 
 ![Security Groups](./assets/5.png)
 
-## 🎭 Scénarios de Détection
+---
 
-### 1. Attaque Force Brute SSH
+## 🎭 Detection Scenarios
 
-**Simulation de tentatives de connexion répétées :**
+### 1. SSH Brute Force Attack
+
+**Simulated repeated login attempts:**
 
 ```bash
 ssh fakeuser@localhost
 ```
 
-![Tentatives SSH](./assets/22.png)
+![SSH Attempts](./assets/22.png)
 
-**Alerte générée par Wazuh :**
+**Alert generated by Wazuh:**
+![Brute Force Alert](./assets/23.png)
 
-![Alerte Force Brute](./assets/23.png)
+---
 
-### 2. Escalade de Privilèges
+### 2. Privilege Escalation
 
-**Commande d'élévation de privilèges :**
+**Privilege elevation command:**
 
 ```bash
 sudo su
 ```
 
-![Escalade Privilèges](./assets/24.png)
+![Privilege Escalation](./assets/24.png)
 
-**Alerte de détection :**
+**Detection alert:**
+![Escalation Alert](./assets/25.png)
 
-![Alerte Escalade](./assets/25.png)
+---
 
-### 3. Modification Fichier Sensible
+### 3. Sensitive File Modification
 
-**Modification du fichier /etc/passwd :**
+**Modification of /etc/passwd file:**
 
 ```bash
 echo "test" >> /etc/passwd
 ```
 
-![Modification Fichier](./assets/26.png)
+![File Modification](./assets/26.png)
 
-**Alerte File Integrity Monitoring (FIM) :**
+**File Integrity Monitoring (FIM) alert:**
+![FIM Alert](./assets/27.png)
 
-![Alerte FIM](./assets/27.png)
+---
 
-### 4. Gestion Comptes Windows
+### 4. Windows Account Management
 
-**Création d'utilisateur et ajout au groupe Administrators :**
+**User creation and addition to Administrators group:**
 
 ```powershell
 net user testuser Password123! /add
 net localgroup Administrators testuser /add
 ```
 
-![Gestion Comptes](./assets/28.png)
+![Account Management](./assets/28.png)
 
-**Alerte de modification de compte :**
-
-![Alerte Windows](./assets/29.png)
-
-## 📊 Dashboard
-
-Le dashboard Wazuh offre une vue centralisée des événements de sécurité :
-
-![Dashboard](./assets/30.png)
-
-**Fonctionnalités principales :**
-- Répartition des alertes par sévérité
-- Évolution temporelle des événements
-- Agents les plus actifs
-- Règles les plus déclenchées
-
-## 🛠️ Technologies Utilisées
-
-| Composant | Version | Rôle |
-|-----------|---------|------|
-| **Wazuh** | 4.7 | SIEM + EDR |
-| **AWS EC2** | - | Hébergement instances |
-| **Ubuntu Server** | 22.04 LTS | OS serveur & client Linux |
-| **Windows Server** | 2019/2022 | Client Windows |
-| **OpenSearch** | - | Indexation des logs |
-
-## 📈 Résultats
-
-✅ Détection en temps réel des menaces  
-✅ Surveillance multi-OS fonctionnelle  
-✅ Corrélation d'événements efficace  
-✅ Interface de visualisation intuitive  
-✅ Alertes contextualisées et détaillées  
-
-## 🎓 Compétences Acquises
-
-- Déploiement d'infrastructure de sécurité cloud
-- Configuration SIEM/EDR
-- Analyse de logs et corrélation d'événements
-- Investigation d'incidents de sécurité
-- Gestion de Security Operations Center (SOC)
-
-## 📝 Informations Projet
-
-**Étudiant :** Tarik Khoumri  
-**Encadrant :** Prof. Azeddine KHIAT  
-**Filière :** II-CCN2  
-**Année :** 2025/2026
-
-## 🔗 Ressources
-
-- [Documentation Wazuh](https://documentation.wazuh.com/)
-- [AWS Security Best Practices](https://aws.amazon.com/security/best-practices/)
-- [MITRE ATT&CK Framework](https://attack.mitre.org/)
-
-## 📄 Licence
-
-Ce projet est réalisé dans un cadre pédagogique.
+**Account modification alert:**
+![Windows Alert](./assets/29.png)
 
 ---
 
-⭐ **Note :** Pour plus de détails techniques, consulter le rapport LaTeX complet du projet.
+## 📊 Dashboard
+
+The Wazuh dashboard provides a centralized view of security events:
+
+![Dashboard](./assets/30.png)
+
+**Main features:**
+
+* Alert distribution by severity
+* Event timeline visualization
+* Most active agents
+* Most triggered rules
+
+---
+
+## 🛠️ Technologies Used
+
+| Component          | Version   | Role                     |
+| ------------------ | --------- | ------------------------ |
+| **Wazuh**          | 4.7       | SIEM + EDR               |
+| **AWS EC2**        | -         | Instance hosting         |
+| **Ubuntu Server**  | 22.04 LTS | Server & Linux client OS |
+| **Windows Server** | 2019/2022 | Windows client           |
+| **OpenSearch**     | -         | Log indexing             |
+
+---
+
+## 📈 Results
+
+* Real-time threat detection
+* Functional multi-OS monitoring
+* Effective event correlation
+* Intuitive visualization interface
+* Contextualized and detailed alerts
+
+---
+
+## 🎓 Skills Acquired
+
+* Cloud security infrastructure deployment
+* SIEM/EDR configuration
+* Log analysis and event correlation
+* Security incident investigation
+* Security Operations Center (SOC) management
+
+---
+
+## 📝 Project Information
+
+**Student:** Tarik Khoumri
+**Supervisor:** Prof. Azeddine KHIAT
+**Program:** II-CCN2
+**Academic Year:** 2025/2026
+
+---
+
+## 🔗 Resources
+
+* [Wazuh Documentation](https://documentation.wazuh.com/)
+* [AWS Security Best Practices](https://aws.amazon.com/security/best-practices/)
+* [MITRE ATT&CK Framework](https://attack.mitre.org/)
+
+---
+
+## 📄 License
+
+This project was completed as part of an academic program.
